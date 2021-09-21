@@ -130,6 +130,7 @@ module.exports = {
       '/resetPassword' : proxyConf,
       '/performPasswordReset' : proxyConf,
       '/isFeatureSupported' : proxyConf,
+      '/saml2': proxyConf
     },
   },
   configureWebpack: {

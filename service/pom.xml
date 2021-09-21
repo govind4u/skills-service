@@ -313,6 +313,12 @@
             <version>0.18.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-saml2-service-provider</artifactId>
+            <version>5.5.2</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -515,11 +521,13 @@
                                 <includedLicense>The GNU General Public License (GPL) Version 2.1</includedLicense>
                                 <includedLicense>ICU License</includedLicense>
                                 <includedLicense>Bouncy Castle Licence</includedLicense>
+                                <includedLicense>The BSD License</includedLicense>
                             </includedLicenses>
                             <licenseMerges>
                                 <licenseMerge>The Apache Software License, Version 2.0|Apache License, Version 2.0</licenseMerge>
                                 <licenseMerge>The Apache Software License, Version 2.0|Apache Public License 2.0</licenseMerge>
                                 <licenseMerge>The Apache Software License, Version 2.0|Apache 2.0</licenseMerge>
+                                <licenseMerge>The Apache Software License, Version 2.0|Apache 2</licenseMerge>
                                 <licenseMerge>The Apache Software License, Version 2.0|The Apache License, Version 2.0</licenseMerge>
                                 <licenseMerge>The Apache Software License, Version 2.0|Apache License, version 2.0</licenseMerge>
                                 <licenseMerge>The Apache Software License, Version 2.0|Apache License 2.0</licenseMerge>

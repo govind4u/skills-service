@@ -34,7 +34,7 @@ import skills.auth.UserInfoService
 import skills.auth.form.jwt.JwtHelper
 import skills.services.inception.InceptionProjectService
 
-@Conditional(SecurityMode.FormAuth)
+@Conditional(SecurityMode.FormOrSAML2Auth)
 @RestController
 @skills.profile.EnableCallStackProf
 @Slf4j

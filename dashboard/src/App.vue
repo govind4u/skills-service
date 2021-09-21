@@ -22,6 +22,7 @@ limitations under the License.
 
         <div class="overall-container">
           <pki-app-bootstrap v-if="isPkiAndNeedsToBootstrap" role="alert"/>
+          <saml-2-app-bootstrap v-if="isSaml2AndNeedsToBootstrap" role="alert"/>
           <loading-container v-else v-bind:is-loading="isLoading" role="presentation">
             <div v-if="!isLoading">
               <header-view v-if="isAuthenticatedUser && !this.$store.state.showUa" role="banner"/>
@@ -80,6 +81,9 @@ limitations under the License.
       },
       isPkiAndNeedsToBootstrap() {
         return this.$store.getters.isPkiAuthenticated && this.$store.getters.config.needToBootstrap;
+      },
+      isSaml2AndNeedsToBootstrap() {
+        return this.$store.getters.isSaml2Authenticated && this.$store.getters.config.needToBootstrap;
       },
     },
     created() {

@@ -22,6 +22,9 @@ const getters = {
   isPkiAuthenticated(state) {
     return state.config.authMode === 'PKI';
   },
+  isSaml2Authenticated(state) {
+    return state.config.authMode === 'SAML2';
+  },
 };
 
 const mutations = {

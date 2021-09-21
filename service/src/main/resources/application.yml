@@ -35,6 +35,12 @@ server:
   shutdown: graceful
 
 spring:
+#  security:
+#    saml2:
+#
+#      metadata-location: <Identity Provider metadata URL>
+#      A unique identifier to represent the mapping between Service Provider(SP) and Identity Provider (IDP)
+#      registrationId: <registrationId>
   lifecycle:
     timeout-per-shutdown-phase: 1m
   #logging:

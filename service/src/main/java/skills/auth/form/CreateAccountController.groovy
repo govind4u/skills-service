@@ -40,7 +40,7 @@ import skills.controller.result.model.OAuth2Provider
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-//@Conditional(SecurityConfiguration.FormAuth)
+@Conditional(SecurityMode.FormAuth)
 @RestController
 @RequestMapping("/")
 @Slf4j

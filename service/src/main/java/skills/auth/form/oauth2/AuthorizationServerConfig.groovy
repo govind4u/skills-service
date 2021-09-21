@@ -48,7 +48,7 @@ import skills.storage.model.ProjDef
 import skills.storage.accessors.ProjDefAccessor
 
 @Configuration
-@Conditional(SecurityMode.FormAuth)
+@Conditional(SecurityMode.FormOrSAML2Auth)
 @EnableAuthorizationServer
 class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 

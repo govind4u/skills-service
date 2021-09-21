@@ -142,12 +142,17 @@ const getLandingPage = () => {
   return landingPage;
 };
 
+const registrationId = () => store.getters.config.saml2RegistrationId;
+const isSaml2 = () => store.getters.isSaml2Authenticated;
+
 router.beforeEach((to, from, next) => {
   const { skillsClientDisplayPath } = to.query;
   store.commit('skillsClientDisplayPath', { path: skillsClientDisplayPath, fromDashboard: true });
 
   const requestAccountPath = '/request-root-account';
-  if (!isPki() && !isLoggedIn() && to.path !== requestAccountPath && store.getters.config.needToBootstrap) {
+  if (isSaml2() && !isLoggedIn() && to.path !== requestAccountPath && store.getters.config.needToBootstrap) {
+    window.location = `/saml2/authenticate/${registrationId()}`;
+  } else if (!isPki() && !isLoggedIn() && to.path !== requestAccountPath && store.getters.config.needToBootstrap) {
     next({ path: requestAccountPath });
   } else if (!isPki() && to.path === requestAccountPath && !store.getters.config.needToBootstrap) {
     next({ name: getLandingPage() });
@@ -179,6 +184,8 @@ router.beforeEach((to, from, next) => {
           const newRoute = { query: { redirect: to.fullPath } };
           if (isPki()) {
             newRoute.name = getLandingPage();
+          } else if (isSaml2()) {
+            window.location = `/saml2/authenticate/${registrationId()}`;
           } else {
             newRoute.name = 'Login';
           }
