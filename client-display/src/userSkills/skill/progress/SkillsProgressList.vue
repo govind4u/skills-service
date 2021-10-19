@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <div class="card mt-2" data-cy="skillsProgressList">
+    <div class="card mt-2" data-cy="skillsProgressList" v-if="(skillsInternal.length > 0 || searchString || showNoDataMsg)">
         <div class="card-header float-left">
             <div class="row" v-if="skillsInternalOrig && skillsInternalOrig.length > 0">
                 <div class="col-md-auto text-left pr-md-0">
@@ -33,7 +33,7 @@ limitations under the License.
                   </div>
                 </div>
                 <div class="col-md text-left my-2 my-md-0 ml-md-0 pl-md-0">
-                  <skills-filter :counts="metaCounts" @filter-selected="filterSkills" @clear-filter="clearFilters"/>
+                  <skills-filter :counts="metaCounts" :filters="filters" @filter-selected="filterSkills" @clear-filter="clearFilters"/>
                 </div>
                 <div class="col-md-auto text-right" >
                     <span class="text-muted pr-1">Skill Details:</span>
@@ -73,7 +73,7 @@ limitations under the License.
                              icon="fas fa-search-minus fa-5x"
                            title="No results" :sub-title="`Please refine [${searchString}] search${(this.filterId) ? ' and/or clear the selected filter' : ''}`"/>
 
-                <no-data-yet v-if="!(skillsInternalOrig && skillsInternalOrig.length > 0)" class="my-5"
+                <no-data-yet v-if="!(skillsInternalOrig && skillsInternalOrig.length > 0) && showNoDataMsg" class="my-5"
                         title="Skills have not been added yet." sub-title="Please contact this project's administrator."/>
             </div>
         </div>
@@ -86,7 +86,7 @@ limitations under the License.
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';
   import SkillProgress2 from './SkillProgress2';
-  import SkillsFilter from './SkillsFilter';
+  import SkillsFilter from '@/common-components/utilities/ListFilterMenu';
   import SkillEnricherUtil from '../../utils/SkillEnricherUtil';
 
   export default {
@@ -110,6 +110,16 @@ limitations under the License.
         type: String,
         default: 'subject',
       },
+      projectId: {
+        type: String,
+        default: null,
+        required: false,
+      },
+      showNoDataMsg: {
+        type: Boolean,
+        default: true,
+        required: false,
+      },
     },
     data() {
       return {
@@ -128,15 +138,52 @@ limitations under the License.
         descriptionsLoaded: false,
         skillsInternal: [],
         skillsInternalOrig: [],
+        filters: [
+          {
+            icon: 'fas fa-battery-empty',
+            id: 'withoutProgress',
+            html: 'Skills <b>without</b> progress',
+            count: 0,
+          },
+          {
+            icon: 'far fa-calendar-check',
+            id: 'withPointsToday',
+            html: 'Skills with points earned <b>today</b>',
+            count: 0,
+          },
+          {
+            icon: 'far fa-check-circle',
+            id: 'complete',
+            html: '<b>Completed</b> skills',
+            count: 0,
+          },
+          {
+            icon: 'fas fa-laptop',
+            id: 'selfReported',
+            html: '<b>Self</b> Reported Skills',
+            count: 0,
+          },
+          {
+            icon: 'fas fa-running',
+            id: 'inProgress',
+            html: 'Skills <b>in progress</b>',
+            count: 0,
+          },
+        ],
       };
     },
     mounted() {
       const theSubject = this.subject;
       this.showDescriptionsInternal = this.showDescriptions;
-      this.skillsInternal = this.subject.skills.map((item) => {
+      let filter = () => true;
+      if (this.projectId) {
+        filter = (s) => s.projectId === this.projectId;
+      }
+      this.skillsInternal = this.subject.skills.filter(filter).map((item) => {
         this.updateMetaCounts(item.meta);
         return { ...item, subject: theSubject };
       });
+
       this.skillsInternalOrig = this.skillsInternal.map((item) => ({ ...item }));
     },
     methods: {
@@ -188,9 +235,20 @@ limitations under the License.
 
         updateSkill(this.skillsInternalOrig);
         updateSkill(this.skillsInternal);
+
+        const skill = this.skillsInternalOrig.find((item) => item.skillId === skillId);
+        if (skill.selfReporting && skill.selfReporting.type === 'HonorSystem') {
+          const event = { skillId };
+          if (this.type !== 'badge') {
+            event.subjectId = this.subject.subjectId;
+          } else if (this.type === 'badge') {
+            event.badgeId = this.subject.badgeId;
+          }
+          this.$emit('self_report', event);
+        }
       },
       filterSkills(filterId) {
-        this.filterId = filterId;
+        this.filterId = filterId.id;
         this.searchAndFilterSkills();
       },
       clearFilters() {

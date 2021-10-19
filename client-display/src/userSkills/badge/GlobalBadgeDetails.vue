@@ -22,7 +22,7 @@ limitations under the License.
 
             <div class="card">
                 <div class="card-body">
-                    <badge-details-overview :badge="badge"></badge-details-overview>
+                    <badge-details-overview :badge="badgeSummary"></badge-details-overview>
                 </div>
               <div v-if="badge.helpUrl" class="card-footer text-left">
                 <a :href="badge.helpUrl" target="_blank" rel="noopener" class="btn btn-sm btn-outline-info skills-theme-btn">
@@ -31,11 +31,16 @@ limitations under the License.
               </div>
             </div>
 
-            <div v-for="projectSummary in projectSummaries" :key="projectSummary.projectId" class="card mt-1">
+            <div v-for="projectSummary in projectSummaries" :key="projectSummary.projectId" class="card mt-1" :data-cy="'gb_'+projectSummary.projectId">
                 <h4 class="card-header text-sm-left text-secondary text-center col">Project: {{ projectSummary.projectName }}</h4>
                 <div class="card-body">
                     <project-level-row v-if="projectSummary && projectSummary.projectLevel" :projectLevel="projectSummary.projectLevel" />
-                    <skills-progress-list v-if="projectSummary && projectSummary.skills" :subject="badge" :show-descriptions="showDescriptions" type="global-badge"/>
+                    <skills-progress-list v-if="projectSummary && projectSummary.skills"
+                                          @self_report="refreshHeader"
+                                          :subject="badge" :projectId="projectSummary.projectId"
+                                          :show-descriptions="showDescriptions"
+                                          :show-no-data-msg="false"
+                                          type="global-badge"/>
                 </div>
             </div>
             <div v-if="!(projectSummaries && projectSummaries.length > 0)">
@@ -68,6 +73,7 @@ limitations under the License.
       return {
         loading: true,
         badge: null,
+        badgeSummary: null,
         initialized: false,
         showDescriptions: false,
       };
@@ -95,8 +101,17 @@ limitations under the License.
         UserSkillsService.getBadgeSkills(this.$route.params.badgeId, true)
           .then((badgeSummary) => {
             this.badge = badgeSummary;
+            this.badgeSummary = badgeSummary;
             this.loading = false;
           });
+      },
+      refreshHeader(event) {
+        if (event.badgeId && event.badgeId === this.badge.badgeId) {
+          UserSkillsService.getBadgeSkills(this.$route.params.badgeId, true, false)
+            .then((badgeSummary) => {
+              this.badgeSummary = badgeSummary;
+            });
+        }
       },
     },
   };

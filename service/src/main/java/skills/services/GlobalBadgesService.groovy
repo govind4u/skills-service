@@ -98,6 +98,9 @@ class GlobalBadgesService {
     @Autowired
     SkillsDepsService skillsDepsService
 
+    @Autowired
+    UserAchievedLevelRepo achievedLevelRepo
+
     @Transactional()
     void saveBadge(String originalBadgeId, BadgeRequest badgeRequest) {
         badgeAdminService.saveBadge(null, originalBadgeId, badgeRequest, SkillDef.ContainerType.GlobalBadge)
@@ -139,10 +142,40 @@ class GlobalBadgesService {
                 levelRefId: toAdd.id, level: level, projectRefId: projDef.id, projectId: projectId,
                 projectName: projDef.name, badgeRefId: badgeSkillDef.id, badgeId: badgeId
         )
+
         DataIntegrityExceptionHandlers.dataIntegrityViolationExceptionHandler.handle(null) {
             globalBadgeLevelDefRepo.save(globalBadgeLevelDef)
         }
     }
+
+    @Transactional()
+    void changeProjectLevelOnBadge(String badgeId, String projectId, Integer existingLevel, Integer newLevel) {
+        SkillDefWithExtra badgeSkillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(null, badgeId, SkillDef.ContainerType.GlobalBadge)
+        if (!badgeSkillDef) {
+            throw new SkillException("Failed to find global badge [${badgeId}]")
+        }
+        ProjDef projDef = projDefRepo.findByProjectId(projectId)
+        if (!projDef) {
+            throw new SkillException("Failed to find project [${projectId}]", projectId)
+        }
+        List<LevelDef> projectLevels = levelDefinitionRepository.findAllByProjectRefId(projDef.id)
+        projectLevels.sort({it.level})
+
+        LevelDef toAdd = projectLevels.find { it.level == newLevel }
+        if (!toAdd) {
+            throw new SkillException("Failed to find level [${newLevel}]", projectId)
+        }
+
+        GlobalBadgeLevelDef existing = globalBadgeLevelDefRepo.findByBadgeIdAndProjectIdAndLevel(badgeId, projectId, existingLevel)
+        log.debug("changing project level on global badge [${badgeId}] from [${projectId}-${existingLevel}] to [${projectId}-${newLevel}]")
+        existing.level = toAdd.level
+
+        DataIntegrityExceptionHandlers.dataIntegrityViolationExceptionHandler.handle(null) {
+            globalBadgeLevelDefRepo.save(existing)
+            badgeAdminService.awardBadgeToUsersMeetingRequirements(badgeSkillDef)
+        }
+    }
+
 
     @Transactional()
     void removeProjectLevelFromBadge(String badgeId, projectId, Integer level) {
@@ -150,7 +183,11 @@ class GlobalBadgesService {
         if (!globalBadgeLevelDef) {
             throw new SkillException("Failed to find global badge project level for badge [${badgeId}], project [${projectId}] and level [${level}]", projectId, badgeId)
         }
+
         globalBadgeLevelDefRepo.delete(globalBadgeLevelDef)
+
+        SkillDef badgeSkillDef = skillDefRepo.findGlobalBadgeByBadgeId(badgeId)
+        badgeAdminService.awardBadgeToUsersMeetingRequirements(badgeSkillDef)
     }
 
     @Transactional(readOnly = true)
@@ -167,7 +204,11 @@ class GlobalBadgesService {
     @Transactional()
     void removeSkillFromBadge(String badgeId, projectId, String skillId) {
         removeGraphRelationship(badgeId, SkillDef.ContainerType.GlobalBadge, projectId, skillId, RelationshipType.BadgeRequirement)
+
+        SkillDef badgeSkillDef = skillDefRepo.findGlobalBadgeByBadgeId(badgeId)
+        badgeAdminService.awardBadgeToUsersMeetingRequirements(badgeSkillDef)
     }
+
     @Transactional
     void assignGraphRelationship(String badgeSkillId, SkillDef.ContainerType skillType, String projectId,
                                  String relationshipSkillId, RelationshipType relationshipType) {

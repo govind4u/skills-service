@@ -22,4 +22,7 @@ export default {
   loadMyBadges() {
     return axios.get('/api/mybadges').then((response) => response.data);
   },
+  findProjectName(projId) {
+    return axios.get(`/api/myprojects/${projId}/name`).then((resp) => resp.data);
+  },
 };

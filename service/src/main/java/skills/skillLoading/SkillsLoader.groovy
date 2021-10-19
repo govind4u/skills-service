@@ -215,7 +215,7 @@ class SkillsLoader {
             })
         }
 
-        return badges
+        return badges.sort { it.badge }
     }
 
     @Profile
@@ -453,12 +453,12 @@ class SkillsLoader {
     }
 
     @Transactional(readOnly = true)
-    SkillSubjectSummary loadSubject(String projectId, String userId, String subjectId, Integer version = -1) {
+    SkillSubjectSummary loadSubject(String projectId, String userId, String subjectId, Integer version = -1, Boolean loadSkills = true) {
         ProjDef projDef = getProjDef(userId, projectId)
         SkillDefWithExtra subjectDef = getSkillDefWithExtra(userId, projectId, subjectId, SkillDef.ContainerType.Subject)
 
         if (version == -1 || subjectDef.version <= version) {
-            return loadSubjectSummary(projDef, userId, subjectDef, version, true)
+            return loadSubjectSummary(projDef, userId, subjectDef, version, loadSkills)
         } else {
             return null
         }
@@ -510,19 +510,19 @@ class SkillsLoader {
     }
 
     @Transactional(readOnly = true)
-    SkillBadgeSummary loadBadge(String projectId, String userId, String subjectId, Integer version = Integer.MAX_VALUE) {
+    SkillBadgeSummary loadBadge(String projectId, String userId, String subjectId, Integer version = Integer.MAX_VALUE, boolean loadSkills=true) {
         ProjDef projDef = getProjDef(userId, projectId)
         SkillDefWithExtra badgeDef = getSkillDefWithExtra(userId, projectId, subjectId, SkillDef.ContainerType.Badge)
 
-        return loadBadgeSummary(projDef, userId, badgeDef, version,true)
+        return loadBadgeSummary(projDef, userId, badgeDef, version,loadSkills)
     }
 
 
     @Transactional(readOnly = true)
-    SkillGlobalBadgeSummary loadGlobalBadge(String userId, String originatingProject, String badgeSkillId, Integer version = Integer.MAX_VALUE) {
+    SkillGlobalBadgeSummary loadGlobalBadge(String userId, String originatingProject, String badgeSkillId, Integer version = Integer.MAX_VALUE, boolean loadSkills=true) {
         SkillDefWithExtra badgeDef = getSkillDefWithExtra(userId, null, badgeSkillId, SkillDef.ContainerType.GlobalBadge)
 
-        return loadGlobalBadgeSummary(userId, originatingProject, badgeDef, version,true)
+        return loadGlobalBadgeSummary(userId, originatingProject, badgeDef, version,loadSkills)
     }
 
     @Transactional(readOnly = true)
@@ -707,7 +707,7 @@ class SkillsLoader {
         int numAchievedSkills = achievedLevelRepository.countAchievedGlobalSkills(userId, badgeDefinition.skillId, SkillRelDef.RelationshipType.BadgeRequirement)
         int numChildSkills = skillDefRepo.countGlobalChildren(badgeDefinition.skillId, SkillRelDef.RelationshipType.BadgeRequirement)
 
-        List<UserAchievement> achievedLevels = achievedLevelRepository.findAllLevelsByUserId(userId)
+        List<UserAchievement> achievedLevels = achievedLevelRepository.findAllProjectLevelsByUserId(userId)
         Map<String, Integer> userProjectLevels = (Map<String, Integer>)achievedLevels?.groupBy { it.projectId }
                 ?.collectEntries {String key, List<UserAchievement> val -> [key,val.collect{it.level}.max()]}
 

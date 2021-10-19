@@ -547,9 +547,15 @@ class SkillsService {
     def removeSkillFromBadge(Map props) {
         wsHelper.adminDelete(getAddSkillToBadgeUrl(props.projectId, props.badgeId, props.skillId), props)
     }
-
+    def assignSkillToGlobalBadge(String projectId, String badgeId, String skillId) {
+        this.assignSkillToGlobalBadge(['badgeId': badgeId, 'projectId': projectId, 'skillId': skillId])
+    }
     def assignSkillToGlobalBadge(Map props) {
         wsHelper.supervisorPost(getAddSkillToGlobalBadgeUrl(props.badgeId, props.projectId, props.skillId), props)
+    }
+
+    def removeSkillFromGlobalBadge(String projectId, String badgeId, String skillId) {
+        this.removeSkillFromGlobalBadge([badgeId: badgeId, projectId: projectId, skillId: skillId])
     }
 
     def removeSkillFromGlobalBadge(Map props) {
@@ -558,6 +564,10 @@ class SkillsService {
 
     def assignProjectLevelToGlobalBadge(Map props) {
         wsHelper.supervisorPost(getAddProjectLevelToGlobalBadgeUrl(props.badgeId, props.projectId, props.level), props)
+    }
+
+    def changeProjectLevelOnGlobalBadge(Map props) {
+        wsHelper.supervisorPost(getchangeProjectLevelOnGlobalBadgeUrl(props.badgeId, props.projectId, props.currentLevel, props.newLevel), [:])
     }
 
     def removeProjectLevelFromGlobalBadge(Map props) {
@@ -595,12 +605,13 @@ class SkillsService {
         wsHelper.get(url.toString(), "api", null, false)
     }
 
-    def getSkillSummary(String userId, String projId, String subjId=null, int version = -1) {
+    def getSkillSummary(String userId, String projId, String subjId=null, int version = -1, boolean includeSkills=true) {
         userId = getUserId(userId)
         String url = "/projects/${projId}/${subjId ? "subjects/${subjId}/" : ''}summary?userId=${userId}"
         if (version >= 0) {
             url += "&version=${version}"
         }
+        url += "&includeSkills=${includeSkills}"
         wsHelper.apiGet(url)
     }
 
@@ -1147,6 +1158,10 @@ class SkillsService {
         return wsHelper.rootPost("/users/previewEmail", ["emailSubject": emailSubject, "emailBody": emailBody])
     }
 
+    def lookupMyProjectName(String projectId) {
+        return wsHelper.apiGet("/myprojects/${projectId}/name")
+    }
+
     private String getProjectUrl(String project) {
         return "/projects/${project}".toString()
     }
@@ -1186,6 +1201,10 @@ class SkillsService {
 
     private String getAddProjectLevelToGlobalBadgeUrl(String badge, String project, String level) {
         return "/badges/${badge}/projects/${project}/level/${level}".toString()
+    }
+
+    private String getchangeProjectLevelOnGlobalBadgeUrl(String badge, String project, String currentLevel, String newLevel) {
+        return "/badges/${badge}/projects/${project}/level/${currentLevel}/${newLevel}"
     }
 
     private String getSaveIconUrl(String project){
