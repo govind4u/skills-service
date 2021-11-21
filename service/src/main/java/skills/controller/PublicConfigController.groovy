@@ -57,7 +57,7 @@ class PublicConfigController {
     @Value('#{"${skills.config.expireUnusedProjectsOlderThan:180}"}')
     int expireUnusedProjectsOlderThan
 
-    @Value('${spring.security.saml2.registrationId}')
+    @Value('#{"${spring.security.saml2.registrationId:okta-saml}"}')
     String saml2RegistrationId;
 
     @Autowired

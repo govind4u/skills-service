@@ -22,7 +22,7 @@ limitations under the License.
 
         <div class="overall-container">
           <pki-app-bootstrap v-if="isPkiAndNeedsToBootstrap" role="alert"/>
-          <saml-2-app-bootstrap v-if="isSaml2AndNeedsToBootstrap" role="alert"/>
+          <saml2-app-bootstrap v-if="isSaml2AndNeedsToBootstrap" role="alert"/>
           <loading-container v-else v-bind:is-loading="isLoading" role="presentation">
             <div v-if="!isLoading">
               <header-view v-if="isAuthenticatedUser && !this.$store.state.showUa" role="banner"/>
@@ -50,6 +50,7 @@ limitations under the License.
   import NewSoftwareVersionComponent from './components/header/NewSoftwareVersion';
   import PkiAppBootstrap from '@//components/access/PkiAppBootstrap';
   import DashboardFooter from './components/header/DashboardFooter';
+  import Saml2AppBootstrap from './components/access/Saml2AppBootstrap';
 
   export default {
     name: 'App',

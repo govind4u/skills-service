@@ -43,7 +43,7 @@ class SAML2SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Value('${spring.security.saml2.metadata-location}')
     String assertingPartyMetadataLocation;
 
-    @Value('${spring.security.saml2.registrationId}')
+    @Value('#{"${spring.security.saml2.registrationId:okta-saml}"}')
     String registrationId;
 
     @Autowired
