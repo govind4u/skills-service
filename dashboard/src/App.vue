@@ -45,6 +45,8 @@ import IconManagerService from '@/components/utils/iconPicker/IconManagerService
 import log from 'loglevel';
 
 log.setLevel('WARN')
+import {usePrimeVue} from "primevue/config";
+import ScrollToTop from "@/common-components/utilities/ScrollToTop.vue";
 
 const authState = useAuthState()
 const appInfoState = useAppInfoState()
@@ -137,7 +139,8 @@ const loadConfigs = () => {
 const notSkillsClient = computed(() => !skillsDisplayInfo.isSkillsClientPath())
 const showHeader = computed(() => notSkillsClient.value && authState.isAuthenticated)
 const isPkiAndNeedsToBootstrap = computed(() => appConfig.isPkiAuthenticated && appConfig.needToBootstrap)
-const inBootstrapMode = computed(() => isPkiAndNeedsToBootstrap.value && notSkillsClient.value)
+const isSAML2AndNeedsToBootstrap = computed(() => appConfig.isSAML2Authenticated && appConfig.needToBootstrap)
+const inBootstrapMode = computed(() => ((isPkiAndNeedsToBootstrap.value || isSAML2AndNeedsToBootstrap.value) && notSkillsClient.value))
 const isCustomizableHeader = computed(() => notSkillsClient.value && !isLoadingApp.value && !inBootstrapMode.value)
 const isDashboardFooter = computed(() => notSkillsClient.value && !isLoadingApp.value && !inBootstrapMode.value)
 </script>
@@ -156,6 +159,7 @@ const isDashboardFooter = computed(() => notSkillsClient.value && !isLoadingApp.
       </div>
       <div v-if="!isLoadingApp" class="m-0">
         <pki-app-bootstrap v-if="inBootstrapMode" role="region"/>
+
         <div v-if="!inBootstrapMode" :class="{ 'overall-container' : notSkillsClient, 'sd-theme-background-color': !notSkillsClient }">
           <new-software-version  />
           <dashboard-header v-if="showHeader" role="banner" />
