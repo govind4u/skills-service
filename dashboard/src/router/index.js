@@ -15,7 +15,6 @@
  */
 import { createRouter, createWebHistory } from 'vue-router'
 import Login from '@/components/access/Login.vue'
-import SSOLogin from "@/components/access/SSOLogin.vue"
 import SSOLogout from '@/components/access/SSOLogout.vue'
 import MyProgress from '@/components/myProgress/MyProgress.vue'
 import createAdminRoutes from './AdminRoutes.js'
@@ -105,17 +104,6 @@ const routes = [
     path: '/skills-login',
     name: 'Login',
     component: Login,
-    meta: {
-      requiresAuth: false,
-      announcer: {
-        message: 'Login'
-      }
-    }
-  },
-  {
-    path: '/sso-login',
-    name: 'SSOLogin',
-    component: SSOLogin,
     meta: {
       requiresAuth: false,
       announcer: {
